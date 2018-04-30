@@ -35,11 +35,11 @@ PDFJS.getDocument(RENDER_OPTIONS.documentId).then((pdf) => {
 });
 ```
 
-See more [examples](https://github.com/marcoguido/pdf-annotate.js.git/blob/master/web/index.js).
+See more [demo](https://marcoguido.github.io/pdf-annotate.js/).
 
 ## Documentation
 
-[View the docs](https://github.com/marcoguido/pdf-annotate.js.git/tree/master/docs).
+[View the docs](https://github.com/marcoguido/pdf-annotate.js/blob/master/docs/README.md).
 
 ## Developing
 
