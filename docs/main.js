@@ -23,10 +23,10 @@ document.getElementById('content-wrapper').addEventListener('scroll', function (
   let visiblePage = document.querySelector(`.page[data-page-number="${visiblePageNum}"][data-loaded="false"]`);
   if (visiblePage) {
     // Prevent invoking UI.renderPage on the same page more than once.
-    if ( !renderedPages[visiblePageNum] ) {
+    if (!renderedPages[visiblePageNum]) {
       renderedPages[visiblePageNum] = true;
       setTimeout(function () {
-      UI.renderPage(visiblePageNum, RENDER_OPTIONS);
+        UI.renderPage(visiblePageNum, RENDER_OPTIONS);
       });
     }
   }
@@ -39,8 +39,8 @@ function render() {
     let viewer = document.getElementById('viewer');
     viewer.innerHTML = '';
     NUM_PAGES = pdf.pdfInfo.numPages;
-    for (let i=0; i<NUM_PAGES; i++) {
-      let page = UI.createPage(i+1);
+    for (let i = 0; i < NUM_PAGES; i++) {
+      let page = UI.createPage(i + 1);
       viewer.appendChild(page);
     }
 
@@ -60,7 +60,7 @@ render();
   function initText() {
     let size = document.querySelector('.toolbar .text-size');
     [8, 9, 10, 11, 12, 14, 18, 24, 30, 36, 48, 60, 72, 96].forEach((s) => {
-      size.appendChild(new Option (s, s));
+      size.appendChild(new Option(s, s));
     });
 
     setText(
@@ -123,8 +123,8 @@ render();
 
   function initPen() {
     let size = document.querySelector('.toolbar .pen-size');
-    for (let i=0; i<20; i++) {
-      size.appendChild(new Option(i+1, i+1));
+    for (let i = 0; i < 20; i++) {
+      size.appendChild(new Option(i + 1, i + 1));
     }
 
     setPen(
@@ -289,8 +289,8 @@ render();
 (function () {
   function handleClearClick(e) {
     if (confirm('Are you sure you want to clear annotations?')) {
-      for (let i=0; i<NUM_PAGES; i++) {
-        document.querySelector(`div#pageContainer${i+1} svg.annotationLayer`).innerHTML = '';
+      for (let i = 0; i < NUM_PAGES; i++) {
+        document.querySelector(`div#pageContainer${i + 1} svg.annotationLayer`).innerHTML = '';
       }
 
       localStorage.removeItem(`${RENDER_OPTIONS.documentId}/annotations`);
@@ -350,7 +350,7 @@ render();
       commentForm.style.display = 'none';
       commentForm.onsubmit = null;
 
-      insertComment({content: 'No comments'});
+      insertComment({ content: 'No comments' });
     }
   }
 
