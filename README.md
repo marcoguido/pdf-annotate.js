@@ -62,4 +62,5 @@ $ npm test
 
 MIT
 
-### Project forked from Instructure's [pdf-annotate.js](https://github.com/instructure/pdf-annotate.js)
+## Additional information 
+Project forked from Instructure's [pdf-annotate.js](https://github.com/instructure/pdf-annotate.js) repository.
