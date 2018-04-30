@@ -1,6 +1,6 @@
 {
   "name": "pdf-annotate.js",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Annotation layer for pdf.js",
   "main": "dist/pdf-annotate.js",
   "scripts": {
@@ -14,7 +14,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/instructure/pdf-annotate.js.git"
+    "url": "git+https://github.com/marcoguido/pdf-annotate.js.git"
   },
   "keywords": [
     "pdf",
@@ -23,9 +23,9 @@
   "author": "Matt Zabriskie",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/instructure/pdf-annotate.js/issues"
+    "url": "https://github.com/marcoguido/pdf-annotate.js.git/issues"
   },
-  "homepage": "https://github.com/instructure/pdf-annotate.js#readme",
+  "homepage": "https://github.com/marcoguido/pdf-annotate.js.git#readme",
   "devDependencies": {
     "babel-core": "6.7.4",
     "babel-loader": "6.2.4",
