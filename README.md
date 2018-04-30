@@ -35,8 +35,6 @@ PDFJS.getDocument(RENDER_OPTIONS.documentId).then((pdf) => {
 });
 ```
 
-See more [demo](https://marcoguido.github.io/pdf-annotate.js/).
-
 ## Documentation
 
 [View the docs](https://github.com/marcoguido/pdf-annotate.js/blob/master/docs/README.md).
