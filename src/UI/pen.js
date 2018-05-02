@@ -11,6 +11,7 @@ import {
 let _enabled = false;
 let _penSize;
 let _penColor;
+let lastMove = null;
 let path;
 let lines;
 
@@ -33,7 +34,7 @@ function handleDocumentMousedown() {
 function handleDocumentMouseup(e) {
   let svg;
   if (lines.length > 1 && (svg = findSVGAtPoint(e.clientX, e.clientY))) {
-    let { documentId, pageNumber } = getMetadata(svg);
+    let {documentId, pageNumber} = getMetadata(svg);
 
     PDFJSAnnotate.getStoreAdapter().addAnnotation(documentId, pageNumber, {
         type: 'drawing',
@@ -129,11 +130,20 @@ export function setPen(penSize = 1, penColor = '000000') {
  * Enable the pen behavior
  */
 export function enablePen() {
-  if (_enabled) { return; }
+  if (_enabled) {
+    return;
+  }
 
   _enabled = true;
+  const contentWrapper = document.getElementById('content-wrapper');
+
   document.addEventListener('mousedown', handleDocumentMousedown);
   document.addEventListener('keyup', handleDocumentKeyup);
+
+  document.addEventListener('touchstart', handleTouchStart, false);
+  contentWrapper.style['overflow-y'] = 'hidden';
+  contentWrapper.style['overflow-x'] = 'hidden';
+  contentWrapper.style['-webkit-overflow-scrolling'] = 'none';
   disableUserSelect();
 }
 
@@ -141,11 +151,84 @@ export function enablePen() {
  * Disable the pen behavior
  */
 export function disablePen() {
-  if (!_enabled) { return; }
+  if (!_enabled) {
+    return;
+  }
 
   _enabled = false;
+  const contentWrapper = document.getElementById('content-wrapper');
+
   document.removeEventListener('mousedown', handleDocumentMousedown);
   document.removeEventListener('keyup', handleDocumentKeyup);
+
+  document.removeEventListener('touchstart', handleTouchStart);
+  contentWrapper.style['overflow-y'] = 'scroll';
+  contentWrapper.style['overflow-x'] = 'scroll';
+  contentWrapper.style['-webkit-overflow-scrolling'] = 'touch';
   enableUserSelect();
 }
+
+/**
+ * Handler for TouchStart event (for pencil drawing)
+ *
+ * @param event
+ */
+function handleTouchStart(event) {
+  lastMove = event;
+  path = null;
+  lines = [];
+  document.addEventListener('touchmove', handleTouchMove);
+  document.addEventListener('touchend', handleTouchEnd);
+};
+
+
+/**
+ * Handler for TouchMove event (for pencil drawing)
+ *
+ * @param event
+ */
+function handleTouchMove(event) {
+  lastMove = event;
+  event.preventDefault();
+  if (event.touches.length > 0) {
+    var e = event.touches[0];
+    savePoint(e.clientX, e.clientY);
+  }
+};
+
+/**
+ * Handler for TouchEnd event (for pencil drawing)
+ *
+ * @param event
+ */
+function handleTouchEnd(event) {
+  if (lastMove && lastMove.touches.length > 0) {
+    const e = lastMove.touches[0];
+    let svg = void 0;
+    if (lines.length > 1 && (svg = (0, findSVGAtPoint)(e.clientX, e.clientY))) {
+      const _getMetadata = (0, getMetadata)(svg);
+
+      const documentId = _getMetadata.documentId;
+      const pageNumber = _getMetadata.pageNumber;
+
+
+      PDFJSAnnotate.getStoreAdapter().addAnnotation(documentId, pageNumber, {
+        type: 'drawing',
+        width: _penSize,
+        color: _penColor,
+        lines: lines
+      })
+        .then(function (annotation) {
+          if (path) {
+            svg.removeChild(path);
+          }
+
+          appendChild(svg, annotation);
+        });
+    }
+  }
+  lastMove = null;
+  document.removeEventListener('touchmove', handleTouchMove);
+  document.removeEventListener('touchend', handleTouchEnd);
+};
 

@@ -4825,6 +4825,7 @@
 	var _enabled = false;
 	var _penSize = void 0;
 	var _penColor = void 0;
+	var lastMove = null;
 	var path = void 0;
 	var lines = void 0;
 
@@ -4847,9 +4848,9 @@
 	function handleDocumentMouseup(e) {
 	  var svg = void 0;
 	  if (lines.length > 1 && (svg = (0, _utils.findSVGAtPoint)(e.clientX, e.clientY))) {
-	    var _getMetadata = (0, _utils.getMetadata)(svg),
-	        documentId = _getMetadata.documentId,
-	        pageNumber = _getMetadata.pageNumber;
+	    var _getMetadata2 = (0, _utils.getMetadata)(svg),
+	        documentId = _getMetadata2.documentId,
+	        pageNumber = _getMetadata2.pageNumber;
 
 	    _PDFJSAnnotate2.default.getStoreAdapter().addAnnotation(documentId, pageNumber, {
 	      type: 'drawing',
@@ -4952,8 +4953,15 @@
 	  }
 
 	  _enabled = true;
+	  var contentWrapper = document.getElementById('content-wrapper');
+
 	  document.addEventListener('mousedown', handleDocumentMousedown);
 	  document.addEventListener('keyup', handleDocumentKeyup);
+
+	  document.addEventListener('touchstart', handleTouchStart, false);
+	  contentWrapper.style['overflow-y'] = 'hidden';
+	  contentWrapper.style['overflow-x'] = 'hidden';
+	  contentWrapper.style['-webkit-overflow-scrolling'] = 'none';
 	  (0, _utils.disableUserSelect)();
 	}
 
@@ -4966,10 +4974,78 @@
 	  }
 
 	  _enabled = false;
+	  var contentWrapper = document.getElementById('content-wrapper');
+
 	  document.removeEventListener('mousedown', handleDocumentMousedown);
 	  document.removeEventListener('keyup', handleDocumentKeyup);
+
+	  document.removeEventListener('touchstart', handleTouchStart);
+	  contentWrapper.style['overflow-y'] = 'scroll';
+	  contentWrapper.style['overflow-x'] = 'scroll';
+	  contentWrapper.style['-webkit-overflow-scrolling'] = 'touch';
 	  (0, _utils.enableUserSelect)();
 	}
+
+	/**
+	 * Handler for TouchStart event (for pencil drawing)
+	 *
+	 * @param event
+	 */
+	function handleTouchStart(event) {
+	  lastMove = event;
+	  path = null;
+	  lines = [];
+	  document.addEventListener('touchmove', handleTouchMove);
+	  document.addEventListener('touchend', handleTouchEnd);
+	};
+
+	/**
+	 * Handler for TouchMove event (for pencil drawing)
+	 *
+	 * @param event
+	 */
+	function handleTouchMove(event) {
+	  lastMove = event;
+	  event.preventDefault();
+	  if (event.touches.length > 0) {
+	    var e = event.touches[0];
+	    savePoint(e.clientX, e.clientY);
+	  }
+	};
+
+	/**
+	 * Handler for TouchEnd event (for pencil drawing)
+	 *
+	 * @param event
+	 */
+	function handleTouchEnd(event) {
+	  if (lastMove && lastMove.touches.length > 0) {
+	    var e = lastMove.touches[0];
+	    var svg = void 0;
+	    if (lines.length > 1 && (svg = (0, _utils.findSVGAtPoint)(e.clientX, e.clientY))) {
+	      var _getMetadata = (0, _utils.getMetadata)(svg);
+
+	      var documentId = _getMetadata.documentId;
+	      var pageNumber = _getMetadata.pageNumber;
+
+	      _PDFJSAnnotate2.default.getStoreAdapter().addAnnotation(documentId, pageNumber, {
+	        type: 'drawing',
+	        width: _penSize,
+	        color: _penColor,
+	        lines: lines
+	      }).then(function (annotation) {
+	        if (path) {
+	          svg.removeChild(path);
+	        }
+
+	        (0, _appendChild2.default)(svg, annotation);
+	      });
+	    }
+	  }
+	  lastMove = null;
+	  document.removeEventListener('touchmove', handleTouchMove);
+	  document.removeEventListener('touchend', handleTouchEnd);
+	};
 
 /***/ },
 /* 33 */
