@@ -38,6 +38,7 @@ PDFJS.getDocument(RENDER_OPTIONS.documentId).then((pdf) => {
 ## Documentation
 
 [View the docs](https://github.com/marcoguido/pdf-annotate.js/blob/master/docs/README.md).
+Run the last built [DEMO](https://marcoguido.github.io/pdf-annotate.js/).
 
 ## Developing
 
@@ -46,15 +47,16 @@ PDFJS.getDocument(RENDER_OPTIONS.documentId).then((pdf) => {
 $ git clone https://github.com/marcoguido/pdf-annotate.js.git
 $ cd pdf-annotate.js
 
-# intall dependencies
+# install dependencies
 $ npm install
 
 # start example server
 $ npm start
 $ open http://localhost:8080
 
-# run tests
-$ npm test
+# only build the demo application
+$ npm run build-demo
+
 ```
 ## License
 

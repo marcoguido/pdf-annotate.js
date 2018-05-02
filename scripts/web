@@ -1,7 +1,17 @@
 #!/bin/bash
 
-./scripts/shared
-cp -rf shared docs
+# Cleanup old compiled files
+rm -rf ./dist/*
 
+# Handle shared files rearrange in folders
+./scripts/shared
+cp -rf ./src/UI/images ./dist/shared
+cp ./src/{example.pdf,index.html} ./dist/
+
+# Copying files in docs/demo folder
+rm -rf ./docs/demo/*
+cp -rf ./dist/* ./docs/demo/
+
+# Start the server and compile assets
 server=./node_modules/.bin/webpack-dev-server
-$server --inline --config ./webpack.web.js --content-base docs/ $*
+$server --inline --config ./webpack.web.js --content-base dist/ $*

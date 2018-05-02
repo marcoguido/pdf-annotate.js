@@ -1,0 +1,16 @@
+#!/bin/bash
+
+# Cleanup old compiled files
+rm -rf ./dist/*
+rm -rf ./docs/demo/*
+
+# Handle shared files rearrange in folders
+./scripts/shared
+cp -rf ./src/UI/images ./dist/shared
+cp ./src/{example.pdf,index.html} ./dist/
+
+# Compile assets
+webpack --config ./webpack.web.js --content-base dist/ $*
+
+# Copying files and compiled resources in docs/demo folder
+cp -rf ./dist/* ./docs/demo/

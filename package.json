@@ -4,10 +4,9 @@
   "description": "Annotation layer for pdf.js",
   "main": "dist/pdf-annotate.js",
   "scripts": {
-    "test": "karma start --single-run",
     "start": "./scripts/web",
     "build": "MINIFY=1 webpack",
-    "coveralls": "cat coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js"
+    "build-demo": "./scripts/build-demo"
   },
   "files": [
     "dist"

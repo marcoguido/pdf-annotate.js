@@ -1,6 +1,6 @@
 import twitter from 'twitter-text';
 import PDFJSAnnotate from '../';
-import initColorPicker from './shared/initColorPicker';
+import initColorPicker from '../shared/initColorPicker';
 
 const { UI } = PDFJSAnnotate;
 const documentId = 'example.pdf';
