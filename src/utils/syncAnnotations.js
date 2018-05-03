@@ -1,6 +1,6 @@
-import renderPage from '../UI/page';
+import { renderPage } from '../UI/page';
 
-const filename = 'example.pdf'; // TODO: will be depending upon current file
+let RENDER_OPTIONS = {};
 
 /**
  * Performs a diff on old and new annotations, returning the newer ones
@@ -29,10 +29,10 @@ function updateAnnotations(newAnnotations) {
   return new Promise((resolve, reject) => {
     try {
       // Read from localstorage
-      if (!localStorage.getItem(`${filename}/annotations`).length) {
-        localStorage.setItem(`${filename}/annotations`, JSON.stringify('[]'));
+      if (!localStorage.getItem(`${RENDER_OPTIONS.documentId}/annotations`).length) {
+        localStorage.setItem(`${RENDER_OPTIONS.documentId}/annotations`, JSON.stringify('[]'));
       }
-      let storedItems = JSON.parse(localStorage.getItem(`${filename}/annotations`));
+      let storedItems = JSON.parse(localStorage.getItem(`${RENDER_OPTIONS.documentId}/annotations`));
       // Fetch elements to be added
       const toBeAddedAnnotations = diff(storedItems, newAnnotations);
       // Extract pages to be re-rendered
@@ -42,7 +42,7 @@ function updateAnnotations(newAnnotations) {
         .filter((item, idx, arr) => (item !== -1) && (!idx || item !== arr[idx - 1]));
       // Write new data to localstorage
       storedItems = storedItems.concat(toBeAddedAnnotations);
-      localStorage.setItem(`${filename}/annotations`, JSON.stringify(storedItems));
+      localStorage.setItem(`${RENDER_OPTIONS.documentId}/annotations`, JSON.stringify(storedItems));
       resolve(toBeRerendered);
     } catch (e) {
       reject(e);
@@ -55,14 +55,16 @@ function updateAnnotations(newAnnotations) {
  *
  * @param newAnnotations JSON object
  */
-export default function sync(newAnnotations) {
+export default function sync(newAnnotations, renderOptions) {
+  RENDER_OPTIONS = renderOptions;
+
   updateAnnotations(newAnnotations)
     .then(pages => {
       console.log('Updating those pages: ', pages);
       return new Promise((resolve, reject) => {
         const promises = [];
         pages.forEach(page => {
-          promises.push(renderPage(page));
+          promises.push(renderPage(page, renderOptions));
         });
         return Promise.all(promises)
           .then(values => resolve(values))
