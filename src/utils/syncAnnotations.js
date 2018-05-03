@@ -1,3 +1,5 @@
+import renderPage from '../UI/page';
+
 const filename = 'example.pdf'; // TODO: will be depending upon current file
 
 /**
@@ -7,25 +9,67 @@ const filename = 'example.pdf'; // TODO: will be depending upon current file
  * @param newAnnotations
  * @return {*}
  */
-function diff (oldAnnotations, newAnnotations) {
-  if(!oldAnnotations) { return newAnnotations; }
-  const differences = newAnnotations.filter(i => {
-    return oldAnnotations.findIndex(i.uuid) === -1;
-  });
-  return differences;
+function diff(oldAnnotations, newAnnotations) {
+  if (!oldAnnotations) {
+    return newAnnotations;
+  }
+  const UUIDs = oldAnnotations
+    .filter(el => typeof el.uuid !== "undefined")
+    .map(el => el.uuid);
+  return newAnnotations.filter(i => typeof i.uuid !== "undefined" && UUIDs.findIndex(el => i.uuid === el) === -1);
 }
 
-export default function sync (newAnnotations) {
-  if(!localStorage.getItem(`${filename}/annotations`).length) {
-    localStorage.setItem(`${filename}/annotations`, []);
-  }
-  const storedItems = JSON.parse(localStorage.getItem(`${filename}/annotations`));
-  const toBeAddedAnnotations = diff(storedItems, newAnnotations);
+/**
+ * Method to update the data in localstorage with the new annotations
+ *
+ * @param newAnnotations
+ * @return {Promise<any>}
+ */
+function updateAnnotations(newAnnotations) {
+  return new Promise((resolve, reject) => {
+    try {
+      // Read from localstorage
+      if (!localStorage.getItem(`${filename}/annotations`).length) {
+        localStorage.setItem(`${filename}/annotations`, JSON.stringify('[]'));
+      }
+      let storedItems = JSON.parse(localStorage.getItem(`${filename}/annotations`));
+      // Fetch elements to be added
+      const toBeAddedAnnotations = diff(storedItems, newAnnotations);
+      // Extract pages to be re-rendered
+      const toBeRerendered = toBeAddedAnnotations
+        .map(i => typeof i.page !== "undefined" ? i.page : -1)
+        .sort()
+        .filter((item, idx, arr) => (item !== -1) && (!idx || item !== arr[idx - 1]));
+      // Write new data to localstorage
+      storedItems = storedItems.concat(toBeAddedAnnotations);
+      localStorage.setItem(`${filename}/annotations`, JSON.stringify(storedItems));
+      resolve(toBeRerendered);
+    } catch (e) {
+      reject(e);
+    }
+  })
+}
 
-  //TODO: comments don't have pages. Make a distinct-like clause to avoid repetitions
-  const reRenderTargetPages = toBeAddedAnnotations.map(i => i.page );
-
-  storedItems.push(toBeAddedAnnotations);
-  localStorage.setItem(`${filename}/annotations`, storedItems);
-  // TODO: re-render changed pages inside reRenderTargetPages variable
+/**
+ * Updates the annotations for current document and re-renders modified pdf pages
+ *
+ * @param newAnnotations JSON object
+ */
+export default function sync(newAnnotations) {
+  updateAnnotations(newAnnotations)
+    .then(pages => {
+      console.log('Updating those pages: ', pages);
+      return new Promise((resolve, reject) => {
+        const promises = [];
+        pages.forEach(page => {
+          promises.push(renderPage(page));
+        });
+        return Promise.all(promises)
+          .then(values => resolve(values))
+          .catch(err => reject(err))
+      });
+    })
+    .catch(err => {
+      console.log('An error occurred: ', err);
+    });
 }
