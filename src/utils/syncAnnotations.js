@@ -1,4 +1,4 @@
-import { renderPage } from '../UI/page';
+import {renderPage} from '../UI/page';
 
 let RENDER_OPTIONS = {};
 
@@ -10,40 +10,53 @@ let RENDER_OPTIONS = {};
  * @return {*}
  */
 function diff(oldAnnotations, newAnnotations) {
-  if (!oldAnnotations) {
-    return newAnnotations;
+  if (!oldAnnotations || !newAnnotations) {
+    return !oldAnnotations ? newAnnotations : [];
   }
-  const UUIDs = oldAnnotations
-    .filter(el => typeof el.uuid !== "undefined")
-    .map(el => el.uuid);
-  return newAnnotations.filter(i => typeof i.uuid !== "undefined" && UUIDs.findIndex(el => i.uuid === el) === -1);
+
+  const changed = [];
+  // FIXME: probably unnecessary loop
+  newAnnotations
+    .forEach(i => {
+      const idx = oldAnnotations.findIndex(el => i.uuid === el.uuid);
+      if (idx >= -1) {
+        changed.push(i);
+      }
+    });
+
+  return changed;
 }
 
 /**
  * Method to update the data in localstorage with the new annotations
  *
  * @param newAnnotations
+ * @param isFirstSync
  * @return {Promise<any>}
  */
-function updateAnnotations(newAnnotations) {
+function updateAnnotations(newAnnotations, isFirstSync) {
   return new Promise((resolve, reject) => {
     try {
-      // Read from localstorage
-      if (!localStorage.getItem(`${RENDER_OPTIONS.documentId}/annotations`).length) {
-        localStorage.setItem(`${RENDER_OPTIONS.documentId}/annotations`, JSON.stringify('[]'));
+      // Read from localStorage
+      let storedItems = [];
+      if (!isFirstSync && localStorage.getItem(`${RENDER_OPTIONS.documentId}/annotations`).length) {
+        storedItems = JSON.parse(localStorage.getItem(`${RENDER_OPTIONS.documentId}/annotations`));
       }
-      let storedItems = JSON.parse(localStorage.getItem(`${RENDER_OPTIONS.documentId}/annotations`));
-      // Fetch elements to be added
-      const toBeAddedAnnotations = diff(storedItems, newAnnotations);
+
+      // Fetch elements to be added or updated
+      const changed = diff(storedItems, newAnnotations);
+
+      // Write new data to localStorage
+      storedItems = changed;
+      localStorage.setItem(`${RENDER_OPTIONS.documentId}/annotations`, JSON.stringify(storedItems));
+
       // Extract pages to be re-rendered
-      const toBeRerendered = toBeAddedAnnotations
+      const pagesToBeReloaded = changed
         .map(i => typeof i.page !== "undefined" ? i.page : -1)
         .sort()
         .filter((item, idx, arr) => (item !== -1) && (!idx || item !== arr[idx - 1]));
-      // Write new data to localstorage
-      storedItems = storedItems.concat(toBeAddedAnnotations);
-      localStorage.setItem(`${RENDER_OPTIONS.documentId}/annotations`, JSON.stringify(storedItems));
-      resolve(toBeRerendered);
+
+      resolve(pagesToBeReloaded);
     } catch (e) {
       reject(e);
     }
@@ -51,26 +64,36 @@ function updateAnnotations(newAnnotations) {
 }
 
 /**
+ * Reloads the pages of the PDF whose annotations changed
+ *
+ * @param pages
+ */
+function reloadPages(pages) {
+  console.log('Updating pages: ', pages);
+  return new Promise((resolve, reject) => {
+    const promises = [];
+    pages.forEach(page => {
+      promises.push(renderPage(page, RENDER_OPTIONS));
+    });
+    return Promise.all(promises)
+      .then(() => resolve())
+      .catch(err => reject(err))
+  });
+}
+
+/**
  * Updates the annotations for current document and re-renders modified pdf pages
  *
- * @param newAnnotations JSON object
+ * @param newAnnotations
+ * @param renderOptions
+ * @param isFirstSync
  */
-export default function sync(newAnnotations, renderOptions) {
+export default function sync(newAnnotations, renderOptions, isFirstSync) {
+  // Exposes current PDF config settings
   RENDER_OPTIONS = renderOptions;
 
-  updateAnnotations(newAnnotations)
-    .then(pages => {
-      console.log('Updating those pages: ', pages);
-      return new Promise((resolve, reject) => {
-        const promises = [];
-        pages.forEach(page => {
-          promises.push(renderPage(page, renderOptions));
-        });
-        return Promise.all(promises)
-          .then(values => resolve(values))
-          .catch(err => reject(err))
-      });
-    })
+  updateAnnotations(newAnnotations, isFirstSync)
+    .then(reloadPages)
     .catch(err => {
       console.log('An error occurred: ', err);
     });
