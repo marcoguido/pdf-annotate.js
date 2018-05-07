@@ -17,7 +17,9 @@ export default function renderText(a) {
     fill: normalizeColor(a.color || '#000'),
     fontSize: a.size
   });
-  text.innerHTML = a.content;
+  //text.innerHTML = a.content;
+  var textNode = document.createTextNode(a.content);
+  text.appendChild(textNode);
 
   return text;
 }
