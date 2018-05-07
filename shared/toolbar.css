@@ -122,3 +122,7 @@ body {
 .text-color, .pen-color {
   display: inline-block;
 }
+
+.hidden {
+  display: none;
+}
