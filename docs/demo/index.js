@@ -337,14 +337,19 @@
 	    setScaleRotate(RENDER_OPTIONS.scale, RENDER_OPTIONS.rotate + 90);
 	  }
 
-	  function handleRotateCCWClick() {
-	    setScaleRotate(RENDER_OPTIONS.scale, RENDER_OPTIONS.rotate - 90);
+	  function toggleCommentsVisibility() {
+	    var element = document.getElementById('comment-wrapper');
+	    if (element.classList.contains('hidden')) {
+	      element.classList.remove('hidden');
+	    } else {
+	      element.classList.add('hidden');
+	    }
 	  }
 
 	  document.querySelector('.toolbar select.scale').value = RENDER_OPTIONS.scale;
 	  document.querySelector('.toolbar select.scale').addEventListener('change', handleScaleChange);
-	  document.querySelector('.toolbar .rotate-ccw').addEventListener('click', handleRotateCCWClick);
 	  document.querySelector('.toolbar .rotate-cw').addEventListener('click', handleRotateCWClick);
+	  document.querySelector('.toolbar .toggle-comments').addEventListener('click', toggleCommentsVisibility);
 	})();
 
 	// Clear toolbar button
@@ -504,10 +509,7 @@
 
 	/*
 	 * Trigger event with following sequence:
-	 *
-	 * var obj = JSON.parse('[{"type":"strikeout","color":"FF0000","rectangles":[{"y":351.984375,"x":343.30810546875,"width":212.34393310546875,"height":10},{"y":361.9375,"x":317,"width":239.114501953125,"height":8},{"y":361.9375,"x":317,"width":239.09930419921875,"height":10},{"y":371.90625,"x":317,"width":239.118896484375,"height":8},{"y":371.90625,"x":317,"width":239.10498046875,"height":10},{"y":381.859375,"x":317,"width":221.77508544921875,"height":8},{"y":381.859375,"x":317,"width":221.76092529296875,"height":10},{"y":391.828125,"x":328.96875,"width":227.14947509765625,"height":8},{"y":391.828125,"x":328.96875,"width":227.13482666015625,"height":10},{"y":401.796875,"x":317,"width":124.9637451171875,"height":10}],"class":"Annotation","uuid":"67c7aa11-096b-4b46-baf0-02ce275c3cc1","page":1},{"type":"strikeout","color":"FF0000","rectangles":[{"y":351.984375,"x":343.30810546875,"width":212.34393310546875,"height":10},{"y":361.9375,"x":317,"width":239.114501953125,"height":8},{"y":361.9375,"x":317,"width":239.09930419921875,"height":10},{"y":371.90625,"x":317,"width":239.118896484375,"height":8},{"y":371.90625,"x":317,"width":239.10498046875,"height":10},{"y":381.859375,"x":317,"width":221.77508544921875,"height":8},{"y":381.859375,"x":317,"width":221.76092529296875,"height":10},{"y":391.828125,"x":328.96875,"width":227.14947509765625,"height":8},{"y":391.828125,"x":328.96875,"width":227.13482666015625,"height":10},{"y":401.796875,"x":317,"width":124.9637451171875,"height":10}],"class":"Annotation","uuid":"ea298afe-3aff-44b0-b0ab-31d619b98f75","page":1},{"type":"area","x":309,"y":412,"width":248,"height":129,"class":"Annotation","uuid":"c827fedb-03d3-479b-a943-943c87bb7426","page":1},{"class":"Comment","uuid":"0e3b880b-01ac-4d06-ba71-f27bef9cfa0a","annotation":"c827fedb-03d3-479b-a943-943c87bb7426","content":"bduibcduil"}]');
 	 * document.dispatchEvent(new CustomEvent('test', { detail: obj }));
-	 *
 	 */
 
 /***/ },
