@@ -1,11 +1,15 @@
+import PDFJS from 'pdfjs-dist/build/pdf';
+import PDFJSAnnotate from './vendor/PDFJSAnnotate/PDFJSAnnotate';
 import twitter from 'twitter-text';
-import PDFJSAnnotate from '../';
-import initColorPicker from '../shared/initColorPicker';
-import { sync, broadcastVariations} from './utils/syncAnnotations';
-import { addEventListener } from './UI/event';
 
-const { UI } = PDFJSAnnotate;
+import initColorPicker from './vendor/PDFJSAnnotate/UI/assets/initColorPicker';
+import {sync, broadcastVariations} from './vendor/PDFJSAnnotate/utils/syncAnnotations';
+import {addEventListener} from './vendor/PDFJSAnnotate/UI/event';
+
+PDFJS.workerSrc = './vendor/pdfjs-dist/build/pdf.worker.js';
 const documentId = 'example.pdf';
+
+const {UI} = PDFJSAnnotate;
 let PAGE_HEIGHT;
 let RENDER_OPTIONS = {
   documentId,
@@ -15,7 +19,6 @@ let RENDER_OPTIONS = {
 };
 
 PDFJSAnnotate.setStoreAdapter(new PDFJSAnnotate.LocalStoreAdapter());
-PDFJS.workerSrc = './shared/pdf.worker.js';
 
 // Render stuff
 let NUM_PAGES = 0;
@@ -52,6 +55,7 @@ function render() {
     });
   });
 }
+
 render();
 
 // Text stuff
@@ -303,6 +307,7 @@ render();
       localStorage.removeItem(`${RENDER_OPTIONS.documentId}/annotations`);
     }
   }
+
   document.querySelector('a.clear').addEventListener('click', handleClearClick);
 })();
 
@@ -357,7 +362,7 @@ render();
       commentForm.style.display = 'none';
       commentForm.onsubmit = null;
 
-      insertComment({ content: 'No comments' });
+      insertComment({content: 'No comments'});
     }
   }
 
@@ -428,8 +433,3 @@ document.addEventListener('test', (e) => {
   console.log('Intercepted sync event trigger');
   sync(e.detail, RENDER_OPTIONS, true);
 });
-
-/*
- * Trigger event with following sequence:
- * document.dispatchEvent(new CustomEvent('test', { detail: obj }));
- */
